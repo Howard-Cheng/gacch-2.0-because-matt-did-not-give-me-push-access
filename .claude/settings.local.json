@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gradlew.bat clean build:*)",
+      "Bash(dir:*)",
+      "Bash(cmd.exe /c \"cd /d C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch && gradlew.bat clean build\")",
+      "Bash(cmd.exe /c \"del \"\"C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch\\app\\src\\main\\java\\com\\example\\gacch\\ImageEmbedder.kt\"\"\")",
+      "Bash(cmd.exe /c \"del \"\"C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch\\app\\src\\main\\java\\com\\example\\gacch\\LatestImageManager.kt\"\"\")",
+      "Bash(cmd.exe /c \"del \"\"C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch\\app\\src\\main\\assets\\mobilenet_v3_small.tflite\"\"\")",
+      "Bash(cmd.exe /c \"cd /d \"\"C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch\"\" && gradlew.bat clean build\")",
+      "Bash(cmd.exe /c \"dir /s /b \"\"C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch\\*.kt\"\" | findstr ImageEmbedder\")",
+      "Bash(cmd.exe /c \"cd /d \"\"C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch\"\" && gradlew.bat clean\")",
+      "Bash(cmd.exe /c:*)",
+      "Bash(powershell:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
