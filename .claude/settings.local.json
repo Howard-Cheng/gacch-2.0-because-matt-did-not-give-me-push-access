@@ -11,7 +11,10 @@
       "Bash(cmd.exe /c \"dir /s /b \"\"C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch\\*.kt\"\" | findstr ImageEmbedder\")",
       "Bash(cmd.exe /c \"cd /d \"\"C:\\Users\\hc001\\OneDrive - Lenovo\\Desktop\\gacch\"\" && gradlew.bat clean\")",
       "Bash(cmd.exe /c:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(findstr:*)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(gradlew.bat build:*)"
     ],
     "deny": [],
     "ask": []

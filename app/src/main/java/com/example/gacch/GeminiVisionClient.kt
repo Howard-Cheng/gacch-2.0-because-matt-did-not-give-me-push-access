@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withTimeout
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Client for interacting with Gemini 2.5 Flash Vision API.
@@ -20,10 +21,13 @@ import kotlinx.coroutines.withTimeout
 object GeminiVisionClient {
 
     private const val TAG = "GeminiVisionClient"
-    private const val MODEL_NAME = "gemini-2.5-flash"
+    private const val MODEL_NAME = "gemini-2.5-flash-lite"
 
     // Mutex to prevent concurrent requests to the same chat session
     private val chatMutex = Mutex()
+
+    // Flag to signal background processing should pause for user query
+    private val userQueryPending = AtomicBoolean(false)
 
     private const val SYSTEM_PROMPT = """
 You are a live vision assistant helping a user understand their surroundings in real-time.
@@ -83,6 +87,12 @@ Remember:
             val chat = continuousChat
                 ?: return Result.failure(IllegalStateException("Chat session not initialized"))
 
+            // PRIORITY: Skip if user query is pending
+            if (userQueryPending.get()) {
+                Log.d(TAG, "User query pending, skipping image")
+                return Result.failure(Exception("User query priority, skipped"))
+            }
+
             // Try to acquire lock - if busy, skip this image (don't queue up)
             if (!chatMutex.tryLock()) {
                 Log.d(TAG, "API busy, skipping this image")
@@ -128,22 +138,33 @@ Remember:
             val chat = continuousChat
                 ?: return Result.failure(IllegalStateException("Chat session not initialized"))
 
-            // Wait for lock (user expects an answer)
-            chatMutex.lock()
+            // Set flag to pause background processing
+            userQueryPending.set(true)
+            Log.d(TAG, "User query priority mode ENABLED")
+
             try {
-                // Add 30-second timeout to prevent hanging forever
-                withTimeout(30000L) {
-                    // User asks question - Gemini answers from context
-                    val response = chat.sendMessage(question)
+                // Wait for lock (user expects an answer)
+                // Background loop will see the flag and skip new images
+                chatMutex.lock()
+                try {
+                    // Add 30-second timeout to prevent hanging forever
+                    withTimeout(30000L) {
+                        // User asks question - Gemini answers from context
+                        val response = chat.sendMessage(question)
 
-                    val answer = response.text
-                        ?: return@withTimeout Result.failure(Exception("Empty response from Gemini"))
+                        val answer = response.text
+                            ?: return@withTimeout Result.failure(Exception("Empty response from Gemini"))
 
-                    Log.d(TAG, "Question answered: ${answer.take(100)}...")
-                    Result.success(answer)
+                        Log.d(TAG, "Question answered: ${answer.take(100)}...")
+                        Result.success(answer)
+                    }
+                } finally {
+                    chatMutex.unlock()
                 }
             } finally {
-                chatMutex.unlock()
+                // Always clear the flag when done (even on error)
+                userQueryPending.set(false)
+                Log.d(TAG, "User query priority mode DISABLED")
             }
 
         } catch (e: Exception) {
